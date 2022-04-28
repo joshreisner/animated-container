@@ -1,26 +1,77 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import styled from "styled-components";
 
-function App() {
+export default function App() {
+  const all = "All",
+    colors = [
+      "DarkSlateBlue",
+      "LightSlateGray",
+      "RebeccaPurple",
+      "SeaGreen",
+      "Tomato",
+    ];
+  const [selected, setSelected] = useState(all);
+  const data = [...Array(40)].map(
+    () => colors[Math.floor(Math.random() * colors.length)]
+  );
+  const filtered = data.filter((color) => [all, color].includes(selected));
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Colors>
+        {[all, ...colors].map((color, index) => (
+          <button
+            className={selected === color ? "selected" : undefined}
+            key={index}
+            onClick={() => setSelected(color)}
+          >
+            {color}
+          </button>
+        ))}
+      </Colors>
+      <Grid>
+        {filtered.map((color, index) => (
+          <div key={index} style={{ backgroundColor: color }}>
+            {color}
+          </div>
+        ))}
+      </Grid>
+    </Container>
   );
 }
 
-export default App;
+const Container = styled.div`
+  display: grid;
+  gap: 1rem;
+  margin: 100px auto;
+  max-width: 1200px;
+`;
+
+const Colors = styled.nav`
+  display: flex;
+  gap: 1rem;
+  button {
+    background-color: white;
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    &.selected {
+      background-color: black;
+      color: white;
+    }
+  }
+`;
+
+const Grid = styled.div`
+  color: white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  > div {
+    align-items: center;
+    display: flex;
+    height: 7rem;
+    justify-content: center;
+    width: calc(25% - 0.75rem);
+  }
+`;
