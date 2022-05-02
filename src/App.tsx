@@ -20,12 +20,12 @@ export default function App() {
           </button>
         ))}
       </Filter>
-      <Isotope gap="1rem">
+      <Isotope>
         {data
-          .filter((item) => [all, item].includes(selected))
-          .map((color, index) => (
-            <Item key={index} style={{ backgroundColor: color }}>
-              {color}
+          .filter((item) => [all, item.color].includes(selected))
+          .map((item) => (
+            <Item key={item.id} style={{ backgroundColor: item.color }}>
+              {item.color}
             </Item>
           ))}
       </Isotope>
