@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import Isotope from "./Isotope";
+import AnimatedGrid from "./AnimatedGrid";
 import { Container, Filter, Item } from "./App.styles";
 import { all, colors, data } from "./App.data";
 
@@ -20,7 +20,7 @@ export default function App() {
           </button>
         ))}
       </Filter>
-      <Isotope>
+      <AnimatedGrid>
         {data
           .filter((item) => [all, item.color].includes(selected))
           .map((item) => (
@@ -28,7 +28,7 @@ export default function App() {
               {item.color}
             </Item>
           ))}
-      </Isotope>
+      </AnimatedGrid>
     </Container>
   );
 }
