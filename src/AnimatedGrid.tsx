@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, cloneElement } from "react";
 
 import { grid, shadowGrid } from "./AnimatedGrid.css";
 
@@ -6,6 +6,15 @@ type AnimatedGridProps = {
   animationTime?: number;
   gap?: string;
   children: JSX.Element[];
+};
+
+type Lookup = {
+  [id: string]: {
+    height: number;
+    width: number;
+    top: number;
+    left: number;
+  };
 };
 
 export default function AnimatedGrid({
@@ -18,6 +27,7 @@ export default function AnimatedGrid({
 
   const animationEnd = useRef<NodeJS.Timeout | null>(null);
   const shadowRef = useRef<HTMLDivElement | null>(null);
+  const childrenRef = useRef<Lookup>({});
 
   //watch children for changes
   useEffect(() => {
@@ -37,6 +47,11 @@ export default function AnimatedGrid({
 
     //new height
     setHeight(shadowRef.current?.getBoundingClientRect().height);
+
+    Object.keys(childrenRef.current).forEach((child) => {
+      console.log(child);
+      //console.log(childrenRef.current[child].getBoundingClientRect());
+    });
 
     console.log(
       [
@@ -67,7 +82,15 @@ export default function AnimatedGrid({
       {buffer}
       {buffer && (
         <div style={{ ...shadowGrid, gap }} ref={shadowRef}>
-          {children}
+          {children.map((child) =>
+            cloneElement(child, {
+              ref: (ref: HTMLDivElement) => {
+                if (child.key) {
+                  childrenRef.current[child.key] = ref.getBoundingClientRect();
+                }
+              },
+            })
+          )}
         </div>
       )}
     </div>
