@@ -40,39 +40,10 @@ export const Filter = styled.nav`
   }
 `;
 
-export const Grid = styled.div`
-  display: grid;
-  gap: 1rem;
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (min-width: 992px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  @media (min-width: 1400px) {
-    grid-template-columns: repeat(5, 1fr);
-  }
-`;
-
-export const Item = styled.div<{ animationTime: number }>`
+export const Item = styled.div`
   align-items: center;
   color: white;
   display: flex;
   height: 7rem;
   justify-content: center;
-  &.transitioning {
-    position: absolute;
-    transition: ${({ animationTime }) => animationTime}ms all ease;
-    &.removing {
-      opacity: 0;
-      transform: scale(0);
-    }
-    &.adding {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 `;

@@ -3,8 +3,8 @@ import { CSSProperties } from "react";
 export const grid: CSSProperties = {
   alignContent: "start",
   backgroundColor: "palegoldenrod",
-  display: "flex",
-  flexWrap: "wrap",
+  display: "grid",
+  gridTemplateColumns: "repeat(5, 1fr)",
   position: "relative",
   transitionProperty: "height",
   transitionTimingFunction: "ease",
