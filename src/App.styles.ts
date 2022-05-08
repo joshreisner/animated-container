@@ -5,19 +5,18 @@ export const Container = styled.div`
   gap: 1rem;
   margin: 1rem auto;
   @media (min-width: 768px) {
-    margin: 2rem auto;
     max-width: 720px;
   }
   @media (min-width: 992px) {
-    margin: 3rem auto;
+    margin: 2rem auto;
     max-width: 960px;
   }
   @media (min-width: 1200px) {
-    margin: 4rem auto;
+    margin: 3rem auto;
     max-width: 1140px;
   }
   @media (min-width: 1400px) {
-    margin: 5rem auto;
+    margin: 4rem auto;
     max-width: 1320px;
   }
 `;

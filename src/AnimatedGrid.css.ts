@@ -12,9 +12,11 @@ export const grid: CSSProperties = {
 
 export const shadowGrid: CSSProperties = {
   ...grid,
-  opacity: 0.25,
+  opacity: 0,
   backgroundColor: "pink",
   position: "absolute",
   top: 0,
-  width: "100%",
+  left: 0,
+  right: 0,
+  zIndex: -10,
 };

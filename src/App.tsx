@@ -23,8 +23,8 @@ export default function App() {
       <AnimatedGrid>
         {data
           .filter((item) => ["All", item.value, item.color].includes(selected))
-          .map((item, index) => (
-            <Item key={index} style={{ backgroundColor: item.color }}>
+          .map((item) => (
+            <Item key={item.id} style={{ backgroundColor: item.color }}>
               {item.value}
             </Item>
           ))}
