@@ -20,7 +20,7 @@ export default function App() {
           </button>
         ))}
       </Filter>
-      <AnimatedGrid>
+      <AnimatedGrid style={{ backgroundColor: "beige" }}>
         {data
           .filter((item) => ["All", item.value, item.color].includes(selected))
           .map((item) => (
