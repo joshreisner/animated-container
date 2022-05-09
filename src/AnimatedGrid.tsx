@@ -112,6 +112,20 @@ export default function AnimatedGrid({
           top: 0,
         };
 
+      changes.adding.forEach((key) => {
+        const target = shadowElements.current[key]?.getBoundingClientRect();
+        styles[key] = {
+          ...buffer.styles[key],
+          height: target?.height,
+          left: target ? target.left - left : undefined,
+          opacity: 1,
+          top: target ? target.top - top : undefined,
+          transform: "scale(1)",
+          transition,
+          width: target?.width,
+        };
+      });
+
       changes.moving.forEach((key) => {
         if (!shadowElements.current[key]) return;
         const target = shadowElements.current[key]?.getBoundingClientRect();
@@ -132,20 +146,6 @@ export default function AnimatedGrid({
         };
       });
 
-      changes.adding.forEach((key) => {
-        const target = shadowElements.current[key]?.getBoundingClientRect();
-        styles[key] = {
-          ...buffer.styles[key],
-          height: target?.height,
-          top: target ? target.top - top : undefined,
-          left: target ? target.left - left : undefined,
-          width: target?.width,
-          opacity: 1,
-          transform: "scale(1)",
-          transition,
-        };
-      });
-
       if (timer.current) {
         clearTimeout(timer.current);
       }
@@ -153,7 +153,11 @@ export default function AnimatedGrid({
       timer.current = setTimeout(() => {
         setBuffer({
           children,
-          gridStyle: { ...buffer.gridStyle, height: undefined },
+          gridStyle: {
+            ...buffer.gridStyle,
+            height: undefined,
+            position: undefined,
+          },
           keys,
           status: "ready",
           styles: {},
