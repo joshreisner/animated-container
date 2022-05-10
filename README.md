@@ -1,19 +1,25 @@
-# Animated Grid
+# Animated Container
 
-React/TypeScript component to display an animated grid layout. You provide your own items and filtering.
+React/TypeScript component to animate layout changes. You provide your own items (and changes).
 
-Interaction pattern inspired by [Isotope](https://isotope.metafizzy.co/) by Dave DeSandro.
+Animation pattern inspired by [Isotope](https://isotope.metafizzy.co/) by Dave DeSandro.
 
 ```
-<AnimatedGrid gap="1rem" animationTime={500}>
-  <Item/>
-  <Item/>
-  <Item/>
-  <Item/>
-  <Item/>
-  <Item/>
-</AnimatedGrid>
+<AnimatedContainer time={600}>
+  <Item key="92fJs7" />
+  <Item key="If7a2l" />
+  <Item key="mvnx3D" />
+  <Item key="8Gkfy6" />
+  <Item key="82eFk5" />
+  <Item key="9fs83o" />
+</AnimatedContainer>
 ```
+
+## Parameters / Notes
+
+- `time` optional transition duration in milliseconds (default `600`)
+- `style` optional CSS properties (but it's easier to style with external CSS)
+- items must have persistent and unique `key` properties (don't key with `index`)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

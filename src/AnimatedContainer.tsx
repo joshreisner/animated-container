@@ -1,44 +1,40 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
+import { Property } from "csstype";
 
-export default function AnimatedGrid({
-  animationTime = 600,
-  gap = "1rem",
+export default function AnimatedContainer({
+  time = 600,
   children,
   style,
 }: {
-  animationTime?: number;
-  gap?: string;
+  time?: number;
   children: JSX.Element[];
   style?: CSSProperties;
 }) {
   const [buffer, setBuffer] = useState<{
     children: JSX.Element[];
-    gridStyle: CSSProperties;
+    height?: number;
     keys: string[];
+    shadowStyles: CSSProperties;
     status: "initializing" | "ready" | "changing" | "running";
     styles: { [key: string]: CSSProperties };
   }>({
     children: [],
-    gridStyle: {
-      ...grid,
-      ...style,
-      gap,
-    },
     keys: [],
+    shadowStyles: {},
     status: "initializing",
     styles: {},
   });
 
   //visible buffered children wrappers
-  const gridDivs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const containerDivs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  //parent grid ref
-  const gridRef = useRef<HTMLDivElement | null>(null);
+  //parent container ref
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   //hidden unbuffered children wrappers
   const shadowDivs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  //"shadow" grid that transparently materializes when a change occurs
+  //"shadow" container that transparently materializes when a change occurs
   const shadowRef = useRef<HTMLDivElement | null>(null);
 
   //timer to run cleanup callback after animation finishes
@@ -58,7 +54,7 @@ export default function AnimatedGrid({
       removing: buffer.keys.filter((key) => !keys.includes(key)),
     };
 
-    //lookup object containing css for gridDivs
+    //lookup object containing css for containerDivs
     const styles: { [key: string]: CSSProperties } = {};
 
     if (buffer.status === "initializing") {
@@ -67,14 +63,14 @@ export default function AnimatedGrid({
     } else if (buffer.status === "ready") {
       //freeze parent style
       const { height, top, left } =
-        gridRef.current?.getBoundingClientRect() ?? {
+        containerRef.current?.getBoundingClientRect() ?? {
           left: 0,
           top: 0,
         };
 
       //freeze child styles
       buffer.keys.forEach((key) => {
-        const css = gridDivs.current[key]?.getBoundingClientRect();
+        const css = containerDivs.current[key]?.getBoundingClientRect();
         styles[key] = {
           height: css?.height,
           left: css ? css.left - left : undefined,
@@ -97,10 +93,22 @@ export default function AnimatedGrid({
         };
       });
 
+      let shadowStyles: CSSProperties = {
+        opacity: 0,
+        position: "absolute",
+        top: 0,
+        zIndex: -10,
+      };
+
+      if (containerRef.current) {
+        shadowStyles = { ...shadowStyles, ...getStyles(containerRef.current) };
+      }
+
       setBuffer({
         ...buffer,
         children: [...buffer.children, ...newElements],
-        gridStyle: { ...buffer.gridStyle, height, position: "relative" },
+        height,
+        shadowStyles,
         status: "changing",
         styles,
       });
@@ -120,7 +128,7 @@ export default function AnimatedGrid({
           opacity: 1,
           top: target ? target.top - top : undefined,
           transform: "scale(1)",
-          transition: `opacity ${animationTime}ms, transform ${animationTime}ms`,
+          transition: `opacity ${time}ms, transform ${time}ms`,
           width: target?.width,
         };
       });
@@ -132,7 +140,7 @@ export default function AnimatedGrid({
           ...buffer.styles[key],
           left: target?.left ? target.left - left : undefined,
           top: target?.top ? target.top - top : undefined,
-          transition: `left ${animationTime}ms, top ${animationTime}ms`,
+          transition: `left ${time}ms, top ${time}ms`,
         };
       });
 
@@ -141,7 +149,7 @@ export default function AnimatedGrid({
           ...buffer.styles[key],
           opacity: 0,
           transform: "scale(0)",
-          transition: `opacity ${animationTime}ms, transform ${animationTime}ms`,
+          transition: `opacity ${time}ms, transform ${time}ms`,
         };
       });
 
@@ -152,29 +160,22 @@ export default function AnimatedGrid({
       timer.current = setTimeout(() => {
         setBuffer({
           children,
-          gridStyle: {
-            ...buffer.gridStyle,
-            height: undefined,
-            position: undefined,
-          },
+          height: undefined,
           keys,
+          shadowStyles: {},
           status: "ready",
           styles: {},
         });
-      }, animationTime);
+      }, time);
 
       setBuffer({
         ...buffer,
-        gridStyle: {
-          ...buffer.gridStyle,
-          height,
-          transition: `height ${animationTime}ms`,
-        },
+        height,
         status: "running",
         styles,
       });
     }
-  }, [animationTime, buffer, children]);
+  }, [time, buffer, children]);
 
   //clean up
   useEffect(() => {
@@ -186,18 +187,26 @@ export default function AnimatedGrid({
   }, []);
 
   return (
-    <div ref={gridRef} style={buffer.gridStyle}>
+    <div
+      ref={containerRef}
+      style={{
+        ...style,
+        height: buffer.height,
+        position: "relative",
+        transition: `height ${time}ms`,
+      }}
+    >
       {buffer.children.map((child) => (
         <div
           key={child.key}
-          ref={(el) => child.key && (gridDivs.current[child.key] = el)}
+          ref={(el) => child.key && (containerDivs.current[child.key] = el)}
           style={child.key ? buffer.styles[child.key] : undefined}
         >
           {child}
         </div>
       ))}
       {buffer.status === "changing" && (
-        <div ref={shadowRef} style={{ ...shadow, gap }}>
+        <div ref={shadowRef} style={{ ...buffer.shadowStyles }}>
           {children.map((child) => (
             <div
               key={child.key}
@@ -212,17 +221,35 @@ export default function AnimatedGrid({
   );
 }
 
-const grid: CSSProperties = {
-  alignContent: "start",
-  display: "grid",
-  gridTemplateColumns: "repeat(5, 1fr)",
-};
-
-const shadow: CSSProperties = {
-  ...grid,
-  opacity: 0,
-  position: "absolute",
-  top: 0,
-  width: "100%",
-  zIndex: -10,
-};
+//copy style properties from parent that are relevant to determining child position
+function getStyles(element: HTMLElement): CSSProperties {
+  const elementStyles = window.getComputedStyle(element);
+  return {
+    alignContent: elementStyles.getPropertyValue("align-content"),
+    alignItems: elementStyles.getPropertyValue("align-items"),
+    columnGap: elementStyles.getPropertyValue("column-gap"),
+    display: elementStyles.getPropertyValue("display"),
+    flexDirection: elementStyles.getPropertyValue(
+      "flex-direction"
+    ) as Property.FlexDirection,
+    flexFlow: elementStyles.getPropertyValue("flex-flow"),
+    flexWrap: elementStyles.getPropertyValue("flex-wrap") as Property.FlexWrap,
+    gap: elementStyles.getPropertyValue("gap"),
+    grid: elementStyles.getPropertyValue("grid"),
+    gridAutoColumns: elementStyles.getPropertyValue("grid-auto-columns"),
+    gridAutoFlow: elementStyles.getPropertyValue("grid-auto-flow"),
+    gridAutoRows: elementStyles.getPropertyValue("grid-auto-rows"),
+    gridTemplate: elementStyles.getPropertyValue("grid-template"),
+    gridTemplateAreas: elementStyles.getPropertyValue("grid-template-areas"),
+    gridTemplateColumns: elementStyles.getPropertyValue(
+      "grid-template-columns"
+    ),
+    //gridTemplateRows: elementStyles.getPropertyValue("grid-template-rows"),
+    justifyContent: elementStyles.getPropertyValue("justify-content"),
+    justifyItems: elementStyles.getPropertyValue("justify-items"),
+    placeContent: elementStyles.getPropertyValue("place-content"),
+    placeItems: elementStyles.getPropertyValue("place-items"),
+    rowGap: elementStyles.getPropertyValue("row-gap"),
+    width: elementStyles.getPropertyValue("width"),
+  };
+}

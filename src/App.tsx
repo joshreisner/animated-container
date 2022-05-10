@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import { Container, Filter, Item } from "./App.styles";
+import { Container, Filter, GridWrapper, Item } from "./App.styles";
 import { all, colors, values, data } from "./App.data";
-import AnimatedGrid from "./AnimatedGrid";
+import AnimatedContainer from "./AnimatedContainer";
 
 export default function App() {
   const [selected, setSelected] = useState(all);
@@ -20,15 +20,19 @@ export default function App() {
           </button>
         ))}
       </Filter>
-      <AnimatedGrid style={{ backgroundColor: "beige" }}>
-        {data
-          .filter((item) => ["All", item.value, item.color].includes(selected))
-          .map((item) => (
-            <Item key={item.id} style={{ backgroundColor: item.color }}>
-              {item.value}
-            </Item>
-          ))}
-      </AnimatedGrid>
+      <GridWrapper>
+        <AnimatedContainer>
+          {data
+            .filter((item) =>
+              ["All", item.value, item.color].includes(selected)
+            )
+            .map((item) => (
+              <Item key={item.id} style={{ backgroundColor: item.color }}>
+                {item.value}
+              </Item>
+            ))}
+        </AnimatedContainer>
+      </GridWrapper>
     </Container>
   );
 }
