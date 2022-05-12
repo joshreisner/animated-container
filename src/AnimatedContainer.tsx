@@ -1,5 +1,4 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
-import { Property } from "csstype";
 
 export default function AnimatedContainer({
   time = 600,
@@ -38,7 +37,7 @@ export default function AnimatedContainer({
   const shadowRef = useRef<HTMLDivElement | null>(null);
 
   //timer to run cleanup callback after animation finishes
-  const timer = useRef<NodeJS.Timeout | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     //get keys from children
@@ -85,6 +84,7 @@ export default function AnimatedContainer({
         (child) => child.key && changes.adding.includes(child.key?.toString())
       );
 
+      //make sure new elements are hidden
       changes.adding.forEach((key) => {
         styles[key] = {
           opacity: 0,
@@ -93,6 +93,7 @@ export default function AnimatedContainer({
         };
       });
 
+      //style the shadow
       let shadowStyles: CSSProperties = {
         opacity: 0,
         position: "absolute",
@@ -100,8 +101,38 @@ export default function AnimatedContainer({
         zIndex: -10,
       };
 
+      //copy layout styles from container to shadow
       if (containerRef.current) {
-        shadowStyles = { ...shadowStyles, ...getStyles(containerRef.current) };
+        const elementStyles = window.getComputedStyle(containerRef.current);
+        const containerStyles = {
+          alignContent: elementStyles.getPropertyValue("align-content"),
+          alignItems: elementStyles.getPropertyValue("align-items"),
+          columnGap: elementStyles.getPropertyValue("column-gap"),
+          display: elementStyles.getPropertyValue("display"),
+          flexDirection: elementStyles.getPropertyValue("flex-direction"),
+          flexFlow: elementStyles.getPropertyValue("flex-flow"),
+          flexWrap: elementStyles.getPropertyValue("flex-wrap"),
+          gap: elementStyles.getPropertyValue("gap"),
+          grid: elementStyles.getPropertyValue("grid"),
+          gridAutoColumns: elementStyles.getPropertyValue("grid-auto-columns"),
+          gridAutoFlow: elementStyles.getPropertyValue("grid-auto-flow"),
+          gridAutoRows: elementStyles.getPropertyValue("grid-auto-rows"),
+          gridTemplate: elementStyles.getPropertyValue("grid-template"),
+          gridTemplateAreas: elementStyles.getPropertyValue(
+            "grid-template-areas"
+          ),
+          gridTemplateColumns: elementStyles.getPropertyValue(
+            "grid-template-columns"
+          ),
+          //gridTemplateRows: elementStyles.getPropertyValue("grid-template-rows"),
+          justifyContent: elementStyles.getPropertyValue("justify-content"),
+          justifyItems: elementStyles.getPropertyValue("justify-items"),
+          placeContent: elementStyles.getPropertyValue("place-content"),
+          placeItems: elementStyles.getPropertyValue("place-items"),
+          rowGap: elementStyles.getPropertyValue("row-gap"),
+          width: elementStyles.getPropertyValue("width"),
+        } as CSSProperties;
+        shadowStyles = { ...shadowStyles, ...containerStyles };
       }
 
       setBuffer({
@@ -219,37 +250,4 @@ export default function AnimatedContainer({
       )}
     </div>
   );
-}
-
-//copy style properties from parent that are relevant to determining child position
-function getStyles(element: HTMLElement): CSSProperties {
-  const elementStyles = window.getComputedStyle(element);
-  return {
-    alignContent: elementStyles.getPropertyValue("align-content"),
-    alignItems: elementStyles.getPropertyValue("align-items"),
-    columnGap: elementStyles.getPropertyValue("column-gap"),
-    display: elementStyles.getPropertyValue("display"),
-    flexDirection: elementStyles.getPropertyValue(
-      "flex-direction"
-    ) as Property.FlexDirection,
-    flexFlow: elementStyles.getPropertyValue("flex-flow"),
-    flexWrap: elementStyles.getPropertyValue("flex-wrap") as Property.FlexWrap,
-    gap: elementStyles.getPropertyValue("gap"),
-    grid: elementStyles.getPropertyValue("grid"),
-    gridAutoColumns: elementStyles.getPropertyValue("grid-auto-columns"),
-    gridAutoFlow: elementStyles.getPropertyValue("grid-auto-flow"),
-    gridAutoRows: elementStyles.getPropertyValue("grid-auto-rows"),
-    gridTemplate: elementStyles.getPropertyValue("grid-template"),
-    gridTemplateAreas: elementStyles.getPropertyValue("grid-template-areas"),
-    gridTemplateColumns: elementStyles.getPropertyValue(
-      "grid-template-columns"
-    ),
-    //gridTemplateRows: elementStyles.getPropertyValue("grid-template-rows"),
-    justifyContent: elementStyles.getPropertyValue("justify-content"),
-    justifyItems: elementStyles.getPropertyValue("justify-items"),
-    placeContent: elementStyles.getPropertyValue("place-content"),
-    placeItems: elementStyles.getPropertyValue("place-items"),
-    rowGap: elementStyles.getPropertyValue("row-gap"),
-    width: elementStyles.getPropertyValue("width"),
-  };
 }
