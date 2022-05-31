@@ -14,13 +14,13 @@ export default function AnimatedContainer({
     height?: number;
     keys: string[];
     shadowStyles: CSSProperties;
-    status: "initializing" | "ready" | "changing" | "running";
+    status: "ready" | "changing" | "running";
     styles: { [key: string]: CSSProperties };
   }>({
-    children: [],
-    keys: [],
+    children: children,
+    keys: children.map((child) => child.key?.toString() ?? ""),
     shadowStyles: {},
-    status: "initializing",
+    status: "ready",
     styles: {},
   });
 
@@ -41,7 +41,7 @@ export default function AnimatedContainer({
 
   useEffect(() => {
     //get keys from children
-    const keys: string[] = children.map((child) => child.key?.toString() ?? "");
+    const keys = children.map((child) => child.key?.toString() ?? "");
 
     //stop if no changes
     if (keys.join() === buffer.keys.join()) return;
@@ -56,10 +56,7 @@ export default function AnimatedContainer({
     //lookup object containing css for containerDivs
     const styles: { [key: string]: CSSProperties } = {};
 
-    if (buffer.status === "initializing") {
-      //set children with no animation
-      setBuffer({ ...buffer, status: "ready", keys, children });
-    } else if (buffer.status === "ready") {
+    if (buffer.status === "ready") {
       //freeze parent style
       const { height, top, left } =
         containerRef.current?.getBoundingClientRect() ?? {
@@ -169,9 +166,11 @@ export default function AnimatedContainer({
         const target = shadowDivs.current[key]?.getBoundingClientRect();
         styles[key] = {
           ...buffer.styles[key],
+          height: target?.height,
           left: target?.left ? target.left - left : undefined,
           top: target?.top ? target.top - top : undefined,
           transition: `left ${time}ms, top ${time}ms`,
+          width: target?.width,
         };
       });
 
